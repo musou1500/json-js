@@ -88,6 +88,55 @@ class Parser {
     }
   }
 
+  parseNumber(): number {
+    const int = this.parseInt();
+    const frac = this.parseFrac();
+    const exp = this.parseExp();
+    return (int + frac) * 10 ** exp;
+  }
+
+  parseExp() {
+    if (this.consumeIfMatched("E", "e")) {
+      const isNegative = this.consumeIfMatched("-");
+      const digits = parseInt(this.parseDigits(), 10);
+      return isNegative ? -digits : digits;
+    } else {
+      return 0;
+    }
+  }
+
+  parseFrac(): number {
+    if (this.consumeIfMatched(".")) {
+      const digits = this.parseDigits();
+      return parseInt(this.parseDigits(), 10) * (10 ** digits.length);
+    } else {
+      return 0;
+    }
+  }
+
+  parseInt(): number {
+    const sign = this.consumeIfMatched("-") ? "-" : "";
+    const fstDigit = this.parseDigit();
+    if (fstDigit === "0") {
+      return 0;
+    } else {
+      return parseInt(sign + fstDigit + this.parseDigits(), 10);
+    }
+  }
+
+  parseDigits(): string {
+    let digits = "";
+    while (!this.reachesEnd()) {
+      try {
+        digits += this.parseDigit();
+      } catch(e) {
+        break;
+      }
+    }
+
+    return digits;
+  }
+
   parseDigit(): string {
     if (this.source[this.pos] === "0") {
       this.pos++;
@@ -205,13 +254,15 @@ class Parser {
       }
     }
 
-    throw new Error(`unexpected char (pos:${this.pos})`);
+    return this.parseNumber();
   }
 
-  consumeIfMatched(str: string) {
-    if(this.source.startsWith(str, this.pos)) {
-      this.pos += str.length;
-      return true;
+  consumeIfMatched(...str: string[]) {
+    for (let s of str) {
+      if(this.source.startsWith(s, this.pos)) {
+        this.pos += s.length;
+        return true;
+      }
     }
 
     return false;
@@ -239,6 +290,11 @@ class Parser {
   "\"a\\nb\"",
   "\"\\u1234abc\"",
   "{ \"str\": \"\\u1234abc\", \"arr\": [true, false, null, \"\\u1234abc\"] }",
+  "0",
+  "-123",
+  "123",
+  "123e2",
+  "123e-2",
 ].forEach(input => {
   const actual = parse(input);
   console.log(input, "=>", actual);
