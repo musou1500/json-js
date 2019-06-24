@@ -4,8 +4,14 @@ function parse(source: string) {
   return new Parser(source).parse();
 }
 
+class UnexpectedChar extends Error {
+  constructor(parser: Parser) {
+    super(`unexpected char (pos:${parser.pos})`);
+  }
+}
+
 class Parser {
-  private pos: number;
+  public pos: number;
 
   constructor(private source: string) {
     this.pos = 0;
@@ -21,7 +27,7 @@ class Parser {
       return chars;
     }
 
-    throw new Error(`unexpected char (pos:${this.pos})`);
+    throw new UnexpectedChar(this);
   }
 
   parseCharacters(): string {
@@ -49,7 +55,7 @@ class Parser {
       return this.parseEscape();
     }
 
-    throw new Error(`unexpected char (pos:${this.pos})`);
+    throw new UnexpectedChar(this);
   }
 
   parseEscape(): string {
@@ -74,7 +80,7 @@ class Parser {
         return String.fromCharCode(parseInt(code, 16));
       };
       default:
-        throw new Error(`unexpected char (pos:${this.pos})`);
+        throw new UnexpectedChar(this);
     }
   }
 
@@ -153,7 +159,7 @@ class Parser {
       return ch;
     }
 
-    throw new Error(`unexpected char (pos:${this.pos})`);
+    throw new UnexpectedChar(this);
   }
 
   parseObject(): { [k: string]: any } {
@@ -178,7 +184,7 @@ class Parser {
   parseMember(): { [k: string]: any } {
     this.skipWs();
     if (!this.consumeIfMatched("\"")) {
-      throw new Error(`unexpected char (pos:${this.pos})`);
+      throw new UnexpectedChar(this);
     }
 
     const key = this.parseString();
@@ -190,7 +196,7 @@ class Parser {
       }
     }
 
-    throw new Error(`unexpected char (pos:${this.pos})`);
+    throw new UnexpectedChar(this);
   }
 
   parseArray(): Array<any> {
