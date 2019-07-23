@@ -97,35 +97,43 @@ class Parser {
     const int = this.parseInt();
     const frac = this.parseFrac();
     const exp = this.parseExp();
-    return (int + frac) * 10 ** exp;
+    return parseFloat(int + frac + exp);
   }
 
   parseExp() {
     if (this.consumeIfMatched("E", "e")) {
-      const isNegative = this.consumeIfMatched("-");
-      const digits = parseInt(this.parseDigits(), 10);
-      return isNegative ? -digits : digits;
+      return 'e' + this.parseSign() + this.parseDigits();
     } else {
-      return 0;
+      return '';
     }
   }
 
-  parseFrac(): number {
+  parseFrac(): string {
     if (this.consumeIfMatched(".")) {
       const digits = this.parseDigits();
-      return parseInt(this.parseDigits(), 10) * (10 ** digits.length);
+      return '.' + digits;
     } else {
-      return 0;
+      return '';
+    }
+  }
+  
+  parseSign(): string {
+    if (this.consumeIfMatched("-")) {
+      return '-';
+    } else if (this.consumeIfMatched('+')) {
+      return '+';
+    } else {
+      return '';
     }
   }
 
-  parseInt(): number {
-    const sign = this.consumeIfMatched("-") ? "-" : "";
+  parseInt(): string {
+    const sign = this.parseSign();
     const fstDigit = this.parseDigit();
-    if (fstDigit === "0") {
-      return 0;
+    if (fstDigit === '0') {
+      return fstDigit;
     } else {
-      return parseInt(sign + fstDigit + this.parseDigits(), 10);
+      return sign + fstDigit + this.parseDigits();
     }
   }
 
@@ -164,10 +172,14 @@ class Parser {
   parseObject(): { [k: string]: any } {
     this.skipWs();
     if (this.consumeIfMatched("}")) {
-      this.pos++;
       return {};
     } else {
-      return this.parseMembers();
+      const members = this.parseMembers();
+      if (!this.consumeIfMatched('}')) {
+        throw new UnexpectedChar(this);
+      }
+
+      return members;
     }
   }
 
@@ -201,10 +213,14 @@ class Parser {
   parseArray(): Array<any> {
     this.skipWs();
     if (this.consumeIfMatched("]")) {
-      this.pos++;
       return [];
     } else {
-      return this.parseElements();
+      const elements = this.parseElements();
+      if (!this.consumeIfMatched(']')) {
+        throw new UnexpectedChar(this);
+      }
+
+      return elements;
     }
   }
 

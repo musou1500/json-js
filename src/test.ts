@@ -2,27 +2,6 @@ import {equal, deepStrictEqual, fail} from 'assert';
 import {parse, UnexpectedChar} from './index';
 import * as fs from 'fs';
 
-function testBasic() {
-  [
-    'true',
-    'false',
-    'null',
-    '[]',
-    '[true, false, null, "\\u1234abc"]',
-    '"abcd"',
-    '"a\\nb"',
-    '"\\u1234abc"',
-    '{ "str": "\\u1234abc", "arr": [true, false, null, "\\u1234abc"] }',
-    '0',
-    '-123',
-    '123',
-    '123e2',
-    '123e-2',
-  ].forEach(input => {
-    const actual = parse(input);
-    deepStrictEqual(actual, JSON.parse(input));
-  });
-}
 
 function surrogate(str: string): string {
   let output = '';
@@ -175,7 +154,7 @@ const correct: any = {
   },
 };
 
-function testWithJsonTestSuite() {
+function runTest() {
   const jsonDir = `${__dirname}/../json-test-suite/correct`;
   const keys = Object.keys(correct);
   for (const key of keys) {
@@ -184,7 +163,9 @@ function testWithJsonTestSuite() {
     try {
       const actual = parse(content);
       deepStrictEqual(actual, correct[key]);
+      console.log('case ' + key + ' => ok');
     } catch (e) {
+      console.log('case ' + key + ' => fail');
       if (e instanceof UnexpectedChar) {
         fail("couldn't parse " + key);
       } else {
@@ -194,6 +175,5 @@ function testWithJsonTestSuite() {
   }
 }
 
-testBasic();
-testWithJsonTestSuite();
+runTest();
 console.log('passed!');
