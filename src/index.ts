@@ -1,10 +1,9 @@
-import { equal, deepStrictEqual } from "assert";
 
-function parse(source: string) {
+export function parse(source: string) {
   return new Parser(source).parse();
 }
 
-class UnexpectedChar extends Error {
+export class UnexpectedChar extends Error {
   constructor(parser: Parser) {
     super(`unexpected char (pos:${parser.pos})`);
   }
@@ -286,25 +285,3 @@ class Parser {
   }
 }
 
-[
-  "true",
-  "false",
-  "null",
-  "[]",
-  "[true, false, null, \"\\u1234abc\"]",
-  "\"abcd\"",
-  "\"a\\nb\"",
-  "\"\\u1234abc\"",
-  "{ \"str\": \"\\u1234abc\", \"arr\": [true, false, null, \"\\u1234abc\"] }",
-  "0",
-  "-123",
-  "123",
-  "123e2",
-  "123e-2",
-].forEach(input => {
-  const actual = parse(input);
-  console.log(input, "=>", actual);
-  deepStrictEqual(actual, JSON.parse(input));
-});
-
-console.log("passed!");
