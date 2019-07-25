@@ -1,4 +1,5 @@
 # json-js
+[![CircleCI](https://circleci.com/gh/musou1500/json-js.svg?style=svg)](https://circleci.com/gh/musou1500/json-js)
 json parser implemented by JavaScript
 
 ```
