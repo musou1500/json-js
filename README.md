@@ -1,5 +1,8 @@
 # json-js
 [![CircleCI](https://circleci.com/gh/musou1500/json-js.svg?style=svg)](https://circleci.com/gh/musou1500/json-js)
+
+[![Actions Status](https://github.com/musou1500/json-js/workflows/Node%20CI/badge.svg)](https://github.com/musou1500/json-js/actions)
+
 json parser implemented by JavaScript
 
 ```
